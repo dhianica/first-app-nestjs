@@ -5,7 +5,7 @@ export class CreateEmployeeDto {
     id: number;
 
     @IsNotEmpty()
-    @IsInt({message: "Must be a number"})
+    @IsInt({message: "NIK Must be a number"})
     nik: number;
 
     @IsNotEmpty()

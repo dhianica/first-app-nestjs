@@ -1,5 +1,5 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -12,8 +12,10 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
   app.useGlobalPipes(new ValidationPipe({
-    
   }));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(
+    app.get(Reflector))
+  );
   await app.listen(3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

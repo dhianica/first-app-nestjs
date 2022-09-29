@@ -1,21 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpCode } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Employee } from './interfaces/employee.interface'
+import { ResponseMessage } from 'src/common/decorators/response.decorator';
 
 @Controller('employee')
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(private readonly employeeService: EmployeeService) { }
 
   @Post()
-  async create(@Body() createEmployeeDto: CreateEmployeeDto): Promise<CreateEmployeeDto> {
-    return this.employeeService.create(createEmployeeDto);
+  async create(@Body() createEmployeeDto: CreateEmployeeDto) {
+    try {
+      return await this.employeeService.create(createEmployeeDto)
+    } catch (error) {
+      throw error
+    }
   }
 
   @Get()
-  async findAll(): Promise<Employee[]>  {
-    return this.employeeService.findAll();
+  async findAll(): Promise<any> {
+    while (true) { }
   }
 
   @Get(':id')

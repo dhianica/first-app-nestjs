@@ -1,36 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { INSERTED, UPDATED, NOT_FOUND, FOUND, SUCCESS } from 'src/common/constants/response.constants';
 
 @Injectable()
 export class EmployeeService {
   private readonly employees: CreateEmployeeDto[] = [];
 
-  checkUnique(employeeDto: CreateEmployeeDto): boolean {
-    const employee = this.employees.find((x) =>
-      x.id === employeeDto.id ||
-      x.nik === employeeDto.nik);
-    if (employee) {
-      return true;
-    }
-    return false;
+  checkUnique(employeeDto: CreateEmployeeDto): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      try {
+        const employee = this.employees.find((x) =>
+          x.id === employeeDto.id ||
+          x.nik === employeeDto.nik);
+        if (employee) {
+          reject(new BadRequestException({
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Duplicated NIK or ID!'
+          }))
+        } else {
+          resolve({
+            status: HttpStatus.CREATED,
+            message: HttpStatus[HttpStatus.CREATED],
+            data: []
+          })
+        }
+      } catch (error) {
+        reject(error)
+      }
+    })
   }
 
-  async create(createEmployeeDto: CreateEmployeeDto): Promise<CreateEmployeeDto> {
-    try {
-      if (!this.checkUnique(createEmployeeDto)) {
-        let newId = 0
-        if (this.employees.length > 0) {
-          newId = Math.max(...this.employees.map(o => o.id))
-        }
-        createEmployeeDto.id = newId + 1;
-        this.employees.push(createEmployeeDto);
-        return createEmployeeDto;
+  async create(createEmployeeDto: CreateEmployeeDto): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.checkUnique(createEmployeeDto)
+          .then((value) => {
+            let newId = 0
+            if (this.employees.length > 0) {
+              newId = Math.max(...this.employees.map(o => o.id))
+            }
+            createEmployeeDto.id = newId + 1;
+            this.employees.push(createEmployeeDto);
+            value.data = createEmployeeDto
+            resolve(value);
+          }).catch((error) => {
+            reject(error)
+          })
+      } catch (error) {
+        reject(error);
       }
-      return null
-    } catch (error) {
-      throw error;
-    }
+    })
+
   }
 
   findAll(): CreateEmployeeDto[] {
